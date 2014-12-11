@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>幻灯片</title>
+    <style type="text/css">
+        body,ul,li{margin: 0; padding: 0;}
+        ul{list-style: none;}
+        .list li{float: left;}
+        .list img{display: block; width: 100%; border: 0;}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <ul class="list">
+            <li><img src="images/img1.jpg" alt=""></li>
+            <li><img src="images/img2.jpg" alt=""></li>
+            <li><img src="images/img3.jpg" alt=""></li>
+            <li><img src="images/img4.jpg" alt=""></li>
+        </ul>
+    </div>
+    <script type="text/javascript" src="mslide.js"></script>
+    <script type="text/javascript">
+        var slide = new MSlide({selector: ".wrap", autoPlay: true, listSelector: ".list"});
+    </script>
+</body>
+</html>

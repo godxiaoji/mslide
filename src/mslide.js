@@ -1,9 +1,9 @@
 /**
-* MSlide.js (Mobile Slide)
-* @Author  Travis
-* @Contact https://github.com/godxiaoji
-* @Version 0.0.1a
-*/
+ * MSlide.js (Mobile Slide)
+ * @Author  Travis
+ * @Contact https://github.com/godxiaoji
+ * @Version 0.0.2a
+ */
 (function(window) {
     var navigator = window.navigator,
         userAgent = navigator.userAgent.toLowerCase();
@@ -14,6 +14,8 @@
     var touchstart = 'touchstart',
         touchmove = 'touchmove',
         touchend = 'touchend';
+
+    function noop() {}
 
     // 样式修正
     var Style = {
@@ -37,9 +39,13 @@
             if (this.prefix === '') {
                 return style;
             }
-            return camel ? 
+            return camel ?
                 (this.prefix + style.charAt(0).toUpperCase() + style.substr(1)) :
                 ('-' + this.prefix.toLowerCase() + '-' + style);
+        },
+        // 获取滑动距离值
+        getTransVal: function(size, direction) {
+            return 'translate3d(' + (direction === 'x' ? size + 'px, 0px, 0px' : '0px, ' + size + 'px, 0px') + ')';
         }
     };
 
@@ -50,46 +56,77 @@
         transitionDuration = Style.addPrefix('transitionDuration', true);
 
     var Slide = function(options) {
+        var self = this;
         // 设置配置
         this.options = options || {};
 
-        this.target = typeof this.options.selector === 'string' ? document.querySelector(this.options.selector) : this.options.selector; // 获取包裹元素
-        this.list = this.options.listSelector ? this.target.querySelector(this.options.listSelector) : this.target.children[1]; // 获取列表
-        this.target.style.overflowX = 'hidden';
+        // 设置方向
+        if (this.options.direction === 'y') {
+            this.direction = 'y';
+            this.directionGroup = ['Y', 'X'];
+        } else {
+            this.direction = 'x';
+            this.directionGroup = ['X', 'Y'];
+        }
+
+        // 设置动画效果
+        var easeMap = ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'];
+        this.easing = easeMap[1];
+        easeMap.forEach(function(val) {
+            if (val === self.options.easing) {
+                self.easing = val;
+            }
+        });
+
+        // 自定义设置
+        var cusMap = ['index', 'onBeforeSlide', 'onSlide', 'autoPlay', 'interval', 'duration'];
+        cusMap.forEach(function(val) {
+            if (self.options[val] != null) {
+                self[val] = self.options[val];
+            }
+        });
+
+        // 获取包裹元素
+        this.target = typeof this.options.selector === 'string' ?
+            document.querySelector(this.options.selector) :
+            this.options.selector;
+        // 获取列表元素
+        this.list = this.options.listSelector ?
+            this.target.querySelector(this.options.listSelector) :
+            this.target.children[1];
+
+        this.target.style['overflow' + this.directionGroup[0]] = 'hidden';
         // 添加滑动事件
         this.target.addEventListener(touchstart, this, false);
         this.setItems();
 
-        // 加入设置
-        var i, allowAdd = 'index,onSlide,autoPlay,interval';
-        for(i in this.options) {
-            if(allowAdd.indexOf(i) !== -1) {
-                this[i] = this.options[i];
-            }
+        // 获取上一页按钮
+        if (this.options.prevSelector) {
+            this.prevBtn = typeof this.options.prevSelector === 'string' ?
+                document.querySelector(this.options.prevSelector) :
+                this.options.prevSelector;
+            this.prevBtn.addEventListener('click', this, false);
         }
-
-        // banner选项
-        // 获取上一元素
-        if(this.options.prevSelector) {
-            this.prev = typeof this.options.prevSelector === 'string' ? document.querySelector(this.options.prevSelector) : this.options.prevSelector;
-            this.prev.addEventListener('click', this, false);
-        }
-        // 获取下一元素
-        if(this.options.nextSelector) {
-            this.next = typeof this.options.nextSelector === 'string' ? document.querySelector(this.options.nextSelector) : this.options.nextSelector;
-            this.next.addEventListener('click', this, false);
+        // 获取下一页按钮
+        if (this.options.nextSelector) {
+            this.nextBtn = typeof this.options.nextSelector === 'string' ?
+                document.querySelector(this.options.nextSelector) :
+                this.options.nextSelector;
+            this.nextBtn.addEventListener('click', this, false);
         }
 
         this.to(this.index);
         this.running = false;
         if (this.autoPlay) {
             this.start();
-        };
+        }
     };
 
     Slide.prototype = {
         // 是否自动播放（配合幻灯片用）
         autoPlay: false,
+        // 滑动中
+        playing: false,
         // 切换间隔
         interval: 4000,
         // 动画间隔
@@ -97,7 +134,7 @@
         // 当前index
         index: 0,
         // 元素宽度
-        itemWidth: 0,
+        itemSize: 0,
         // 获取items最后索引
         getLastIndex: function() {
             return this.items.length - 1;
@@ -110,19 +147,24 @@
         // 设置列表项
         setItems: function() {
             // 设置滑动样式属性
-            var itemWidth = this.target.offsetWidth;
+            var sizeName = this.direction === 'x' ? 'Width' : 'Height',
+                itemSize = this.target['offset' + sizeName];
 
-            this.itemWidth = itemWidth;
-            this.items = [].slice.call(this.list.children, 0); // 获取列表项
+            this.itemSize = itemSize;
+            this.items = [].slice.call(this.list.children, 0);
 
             this.list.style.cssText = [
-                'width:' + (itemWidth * this.items.length) + 'px',
-                cssTransform + ':translate3d(' + ( - itemWidth * this.index) + 'px,0px,0px)',
-                cssTransition + ':' + cssTransform + ' 0ms'
+                sizeName.toLowerCase() + ': ' + (itemSize * this.items.length) + 'px',
+                cssTransform + ': ' + Style.getTransVal(-itemSize * this.index, this.direction),
+                cssTransition + ': ' + cssTransform + ' 0ms ' + this.easing,
+                '-webkit-backface-visibility: hidden',
+                'backface-visibility: hidden;',
+                '-webkit-perspective: 1000;',
+                'perspective: 1000;'
             ].join(";");
 
             this.items.forEach(function(item) {
-                item.style.width = itemWidth + 'px';
+                item.style[sizeName.toLowerCase()] = itemSize + 'px';
             });
         },
         /* 事件 */
@@ -139,55 +181,67 @@
                     this.onTouchEnd(e);
                     break;
                 case 'click':
-                    if (e.target == this.prev) {
+                    if (e.target == this.prevBtn) {
                         this.onPrevClick();
-                    } else if (e.target == this.next) {
+                    } else if (e.target == this.nextBtn) {
                         this.onNextClick();
                     }
                     break;
             }
         },
+        // 滑动前调用事件
+        onBeforeSlide: noop,
         // 滑动后回调事件
-        onSlide: function() {},
+        onSlide: noop,
         // 滑动开始事件-记录坐标
         onTouchStart: function(e) {
             var self = this;
 
+            if(this.playing) {
+                return;
+            }
+
             // 清除幻灯片
-            self.clear();
-            if(isAndroid) {
+            this.clear();
+            if (isAndroid) {
                 // 安卓兼容touchend监控失效
                 // 3秒后认为滑动结束
-                self.touchMoveTimeout = setTimeout(function() {
+                this.touchMoveTimeout = setTimeout(function() {
                     self.resetStatus();
                 }, 3000);
             }
             // 重置事件
-            self.target.removeEventListener(touchmove, self, false);
-            self.target.removeEventListener(touchend, self, false);
-            self.target.addEventListener(touchmove, self, false);
-            self.target.addEventListener(touchend, self, false);
-            delete self.horizontal;
+            this.target.removeEventListener(touchmove, this, false);
+            this.target.removeEventListener(touchend, this, false);
+            this.target.addEventListener(touchmove, this, false);
+            this.target.addEventListener(touchend, this, false);
+            delete this.horizontal;
             // 记录坐标
-            self.touchCoords = {};
-            self.touchCoords.startX = e.touches[0].pageX;
-            self.touchCoords.startY = e.touches[0].pageY;
-            self.touchCoords.timeStamp = e.timeStamp;
+            this.touchCoords = {};
+            this.touchCoords.startX = e.touches[0].pageX;
+            this.touchCoords.startY = e.touches[0].pageY;
+            this.touchCoords.timeStamp = e.timeStamp;
         },
         // 滑动过程事件-判断横竖向，跟随滑动
         onTouchMove: function(e) {
-            var self = this;
-
-            if (!self.touchCoords) {
+            if (!this.touchCoords) {
                 return;
             }
-            self.touchCoords.stopX = e.touches[0].pageX;
-            self.touchCoords.stopY = e.touches[0].pageY;
+            this.touchCoords.stopX = e.touches[0].pageX;
+            this.touchCoords.stopY = e.touches[0].pageY;
 
-            var offsetX = self.touchCoords.startX - self.touchCoords.stopX,
-                absX = Math.abs(offsetX),
-                absY = Math.abs(self.touchCoords.startY - self.touchCoords.stopY);
-            if (typeof self.horizontal !== 'undefined') {
+            var offsetX = this.touchCoords.startX - this.touchCoords.stopX,
+                offsetY = this.touchCoords.startY - this.touchCoords.stopY;
+
+            if (this.direction === 'y') {
+                // 想个数值进行交换
+                offsetX = [offsetY, offsetY = offsetX][0];
+            };
+
+            var absX = Math.abs(offsetX),
+                absY = Math.abs(offsetY);
+
+            if (typeof this.horizontal !== 'undefined') {
                 // 首次
                 if (offsetX !== 0) {
                     // bug hack
@@ -196,48 +250,53 @@
             } else {
                 // 首次move确认是否水平移动
                 if (absX > absY) {
-                    self.horizontal = true;
+                    this.horizontal = true;
                     if (offsetX !== 0) {
                         e.preventDefault();
                     }
-                    clearTimeout(self.touchMoveTimeout);
+                    clearTimeout(this.touchMoveTimeout);
                 } else {
-                    delete self.touchCoords;
-                    self.horizontal = false;
+                    delete this.touchCoords;
+                    this.horizontal = false;
                     return;
                 }
             }
-            var itemWidth = self.itemWidth,
-            active = self.index,
-            translateX = active * itemWidth,
-            last = self.getLastIndex();
+
+            var itemSize = this.itemSize,
+                active = this.index,
+                transSize = active * itemSize,
+                last = this.getLastIndex();
+
             if ((active === 0 && offsetX < 0) || (active == last && offsetX > 0)) {
-                translateX += Math.ceil(offsetX / Math.log(Math.abs(offsetX)));
+                transSize += Math.ceil(offsetX / Math.log(Math.abs(offsetX)));
             } else {
-                translateX += offsetX;
+                transSize += offsetX;
             }
-            if (absX < itemWidth) {
-                self.list.style[transform] = 'translate3d(' + -translateX + 'px, 0px, 0px)';
+            if (absX < itemSize) {
+                this.list.style[transform] = Style.getTransVal(-transSize, this.direction);
             }
         },
         // 滑动结束事件-滑到指定位置，重置状态
         onTouchEnd: function(e) {
-            var self = this;
+            clearTimeout(this.touchMoveTimeout);
+            this.target.removeEventListener(touchmove, this, false);
+            this.target.removeEventListener(touchend, this, false);
 
-            clearTimeout(self.touchMoveTimeout);
-            self.target.removeEventListener(touchmove, self, false);
-            self.target.removeEventListener(touchend, self, false);
-            if (self.touchCoords) {
-                var itemWidth = self.itemWidth,
-                absX = Math.abs(self.touchCoords.startX - self.touchCoords.stopX),
-                active = self.index,
-                transIndex;
+            if (this.touchCoords) {
+                var itemSize = this.itemSize,
+                    offsetX = this.direction === 'x' ?
+                        this.touchCoords.startX - this.touchCoords.stopX :
+                        this.touchCoords.startY - this.touchCoords.stopY,
+                    absX = Math.abs(offsetX),
+                    active = this.index,
+                    transIndex;
+
                 if (!isNaN(absX) && absX !== 0) {
-                    if (absX > itemWidth) {
-                        absX = itemWidth;
+                    if (absX > itemSize) {
+                        absX = itemSize;
                     }
-                    if (absX >= 80 || (e.timeStamp - self.touchCoords.timeStamp < 200)) {
-                        if (self.touchCoords.startX > self.touchCoords.stopX) {
+                    if (absX >= 80 || (e.timeStamp - this.touchCoords.timeStamp < 200)) {
+                        if (offsetX > 0) {
                             transIndex = active + 1;
                         } else {
                             transIndex = active - 1;
@@ -246,8 +305,8 @@
                         transIndex = active;
                     }
 
-                    self.to(transIndex);
-                    delete self.touchCoords;
+                    this.to(transIndex);
+                    delete this.touchCoords;
                 }
             }
             this.resetStatus();
@@ -298,47 +357,54 @@
         // 启动自动滑动
         run: function() {
             var self = this;
-            if(!self.slideTimer) {
-                self.slideTimer = setInterval(function() {
+            if (!this.slideTimer) {
+                this.slideTimer = setInterval(function() {
                     self.to(self.getCircleIndex(1));
-                },
-                self.interval);
+                }, this.interval);
             }
         },
         // 恢复滑动状态
         resetStatus: function() {
-            if(this.autoPlay) {
+            if (this.autoPlay) {
                 this.run();
             }
         },
         // 到指定项
         to: function(toIndex) {
             var active = this.index;
-            if(toIndex >= 0 && toIndex <= this.getLastIndex() && toIndex != active) {
+            if (toIndex >= 0 && toIndex <= this.getLastIndex() && toIndex != active) {
                 this.slide(toIndex);
             } else {
                 this.slide(active);
-            }            
+            }
         },
         // 滑动实现
         slide: function(toIndex) {
             var self = this;
-            self.index = toIndex;
 
-            self.list.style[transitionDuration] = self.duration + 'ms';
-            self.list.style[transform] = 'translate3d(' + ( - self.itemWidth * toIndex) + 'px, 0px, 0px)';
+            if(this.playing) {
+                return;
+            }
+            this.playing = true;
+
+            this.index = toIndex;
+            this.onBeforeSlide(this.index);
+
+            this.list.style[transitionDuration] = this.duration + 'ms';
+            this.list.style[transform] = Style.getTransVal(-this.itemSize * toIndex, this.direction);
 
             setTimeout(function() {
+                self.playing = false;
                 self.list.style[transitionDuration] = '0ms';
                 // 滑动回调
                 self.onSlide(self.index);
-            }, self.duration);
+            }, this.duration);
         },
         // 刷新
         refresh: function() {
             this.setItems();
             var last = this.getLastIndex();
-            if(this.index > last) {
+            if (this.index > last) {
                 this.to(last);
             }
         },
@@ -350,9 +416,9 @@
             this.target.removeEventListener(touchstart, this, false);
             this.target.removeEventListener(touchmove, this, false);
             this.target.removeEventListener(touchend, this, false);
-            this.prev && this.prev.removeEventListener('click', this, false);
-            this.next && this.next.removeEventListener('click', this, false);
-            this.target = this.list = this.items = this.prev = this.next = null;
+            this.prevBtn && this.prevBtn.removeEventListener('click', this, false);
+            this.nextBtn && this.nextBtn.removeEventListener('click', this, false);
+            this.target = this.list = this.items = this.prevBtn = this.nextBtn = null;
         }
     };
 

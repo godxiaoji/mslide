@@ -2,7 +2,7 @@
  * MSlide.js (Mobile Slide)
  * @Author  Travis
  * @Contact https://github.com/godxiaoji
- * @Version 0.0.2a
+ * @Version 0.0.4a
  */
 (function(window) {
     var navigator = window.navigator,
@@ -63,10 +63,10 @@
         // 设置方向
         if (this.options.direction === 'y') {
             this.direction = 'y';
-            this.directionGroup = ['Y', 'X'];
+            this.directionGroup = ['Y', 'X', 'Height', 'Width'];
         } else {
             this.direction = 'x';
-            this.directionGroup = ['X', 'Y'];
+            this.directionGroup = ['X', 'Y', 'Width', 'Height'];
         }
 
         // 设置动画效果
@@ -79,12 +79,15 @@
         });
 
         // 自定义设置
-        var cusMap = ['index', 'onBeforeSlide', 'onSlide', 'autoPlay', 'interval', 'duration'];
+        var cusMap = ['index', 'onBeforeSlide', 'onSlide', 'autoPlay', 'interval', 'duration', 'slideType'];
         cusMap.forEach(function(val) {
             if (self.options[val] != null) {
                 self[val] = self.options[val];
             }
         });
+
+        // 跟随，渐变不开启跟随
+        this.follow = (this.options.follow === false || this.slideType === 'fade') ? false : true;
 
         // 获取包裹元素
         this.target = typeof this.options.selector === 'string' ?
@@ -95,7 +98,6 @@
             this.target.querySelector(this.options.listSelector) :
             this.target.children[1];
 
-        this.target.style['overflow' + this.directionGroup[0]] = 'hidden';
         // 添加滑动事件
         this.target.addEventListener(touchstart, this, false);
         this.setItems();
@@ -146,22 +148,55 @@
         },
         // 设置列表项
         setItems: function() {
+            this.items = [].slice.call(this.list.children, 0);
+
+            if (this.slideType === 'fade') {
+                this.setFadeStyle();
+                return;
+            }
+            this.setSlideStyle();
+        },
+        // 设置渐变属性
+        setFadeStyle: function() {
+            var self = this,
+                width = this.list.offsetWidth,
+                height = this.list.offsetHeight;
+
+            this.list.style.width = width + 'px';
+            this.list.style.height = height + 'px';
+
+            this.items.forEach(function(item, i) {
+                item.style.cssText = [
+                    'position: absolute;',
+                    'left: 0;',
+                    'top: 0;',
+                    'width: ' + width + 'px;',
+                    'Height: ' + height + 'px;',
+                    cssTransform + ': ' + Style.getTransVal(0, this.direction) + ';',
+                    cssTransition + ': opacity 0ms ' + self.easing + ';'
+                ].join('');
+
+                item.style.opacity = i === 0 ? 1 : 0;
+            });
+        },
+        // 设置滑动属性
+        setSlideStyle: function() {
             // 设置滑动样式属性
-            var sizeName = this.direction === 'x' ? 'Width' : 'Height',
+            var sizeName = this.directionGroup[2],
                 itemSize = this.target['offset' + sizeName];
 
             this.itemSize = itemSize;
-            this.items = [].slice.call(this.list.children, 0);
+            this.target.style['overflow' + this.directionGroup[0]] = 'hidden';
 
             this.list.style.cssText = [
-                sizeName.toLowerCase() + ': ' + (itemSize * this.items.length) + 'px',
-                cssTransform + ': ' + Style.getTransVal(-itemSize * this.index, this.direction),
-                cssTransition + ': ' + cssTransform + ' 0ms ' + this.easing,
-                '-webkit-backface-visibility: hidden',
+                sizeName.toLowerCase() + ': ' + (itemSize * this.items.length) + 'px;',
+                cssTransform + ': ' + Style.getTransVal(-itemSize * this.index, this.direction) + ';',
+                cssTransition + ': ' + cssTransform + ' 0ms ' + this.easing + ';',
+                '-webkit-backface-visibility: hidden;',
                 'backface-visibility: hidden;',
                 '-webkit-perspective: 1000;',
                 'perspective: 1000;'
-            ].join(";");
+            ].join('');
 
             this.items.forEach(function(item) {
                 item.style[sizeName.toLowerCase()] = itemSize + 'px';
@@ -197,7 +232,7 @@
         onTouchStart: function(e) {
             var self = this;
 
-            if(this.playing) {
+            if (this.playing) {
                 return;
             }
 
@@ -262,6 +297,11 @@
                 }
             }
 
+            if (!this.follow) {
+                // 不跟随移动
+                return;
+            }
+
             var itemSize = this.itemSize,
                 active = this.index,
                 transSize = active * itemSize,
@@ -285,8 +325,8 @@
             if (this.touchCoords) {
                 var itemSize = this.itemSize,
                     offsetX = this.direction === 'x' ?
-                        this.touchCoords.startX - this.touchCoords.stopX :
-                        this.touchCoords.startY - this.touchCoords.stopY,
+                    this.touchCoords.startX - this.touchCoords.stopX :
+                    this.touchCoords.startY - this.touchCoords.stopY,
                     absX = Math.abs(offsetX),
                     active = this.index,
                     transIndex;
@@ -380,24 +420,37 @@
         },
         // 滑动实现
         slide: function(toIndex) {
-            var self = this;
+            var self = this,
+                fromIndex = this.index;
 
-            if(this.playing) {
+            if (this.playing) {
                 return;
             }
             this.playing = true;
-
             this.index = toIndex;
-            this.onBeforeSlide(this.index);
+            this.onBeforeSlide(toIndex, fromIndex);
 
-            this.list.style[transitionDuration] = this.duration + 'ms';
-            this.list.style[transform] = Style.getTransVal(-this.itemSize * toIndex, this.direction);
+            if (this.slideType === 'fade') {
+                // 渐变模式
+                var fadeIndex = toIndex >= fromIndex ? toIndex : fromIndex;
+
+                self.items[fadeIndex].style[transitionDuration] = this.duration + 'ms';
+                this.items[fadeIndex].style.opacity = toIndex >= fromIndex ? 1 : 0;
+            } else {
+                // 滑动模式
+                this.list.style[transitionDuration] = this.duration + 'ms';
+                this.list.style[transform] = Style.getTransVal(-this.itemSize * toIndex, this.direction);
+            }
 
             setTimeout(function() {
                 self.playing = false;
-                self.list.style[transitionDuration] = '0ms';
+                if (self.slideType === 'fade') {
+                    self.items[fadeIndex].style[transitionDuration] = '0ms';
+                } else {
+                    self.list.style[transitionDuration] = '0ms';
+                }
                 // 滑动回调
-                self.onSlide(self.index);
+                self.onSlide(toIndex, fromIndex);
             }, this.duration);
         },
         // 刷新

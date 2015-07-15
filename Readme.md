@@ -5,7 +5,7 @@
 可用于实现幻灯片
 或者安卓常见的左右滑动窗口
 
-效果详见 [Demo](http://travisup.com/demo/plugins/mslide/demo.html)
+效果详见 [Demo](http://travisup.com/demo/plugins/mslide/demo)
 
 ### Usage
 

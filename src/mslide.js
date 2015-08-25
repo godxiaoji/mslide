@@ -2,7 +2,7 @@
  * MSlide.js (Mobile Slide)
  * @Author  Travis
  * @Contact https://github.com/godxiaoji
- * @Version 0.0.4a
+ * @Version 0.0.5a
  */
 (function(window) {
     var navigator = window.navigator,
@@ -46,6 +46,12 @@
         // 获取滑动距离值
         getTransVal: function(size, direction) {
             return 'translate3d(' + (direction === 'x' ? size + 'px, 0px, 0px' : '0px, ' + size + 'px, 0px') + ')';
+        },
+        // 设置样式
+        set: function(elem, obj) {
+            for(var i in obj) {
+                elem.style[i] = obj[i];
+            }
         }
     };
 
@@ -53,6 +59,7 @@
     var cssTransform = Style.addPrefix('transform'),
         cssTransition = Style.addPrefix('transition'),
         transform = Style.addPrefix('transform', true),
+        transition = Style.addPrefix('transition', true),
         transitionDuration = Style.addPrefix('transitionDuration', true);
 
     var Slide = function(options) {
@@ -166,37 +173,40 @@
             this.list.style.height = height + 'px';
 
             this.items.forEach(function(item, i) {
-                item.style.cssText = [
-                    'position: absolute;',
-                    'left: 0;',
-                    'top: 0;',
-                    'width: ' + width + 'px;',
-                    'Height: ' + height + 'px;',
-                    cssTransform + ': ' + Style.getTransVal(0, this.direction) + ';',
-                    cssTransition + ': opacity 0ms ' + self.easing + ';'
-                ].join('');
-
-                item.style.opacity = i === 0 ? 1 : 0;
+                var styleObj = {
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: width + 'px',
+                    height: height + 'px',
+                    opacity: (i === 0 ? 1 : 0)
+                };
+                styleObj[transform] = Style.getTransVal(0, this.direction);
+                styleObj[transition] = 'opacity 0ms ' + self.easing;
+                Style.set(item, styleObj);
             });
         },
         // 设置滑动属性
         setSlideStyle: function() {
             // 设置滑动样式属性
             var sizeName = this.directionGroup[2],
-                itemSize = this.target['offset' + sizeName];
+                itemSize = this.target['offset' + sizeName],
+                styleObj;
 
             this.itemSize = itemSize;
             this.target.style['overflow' + this.directionGroup[0]] = 'hidden';
 
-            this.list.style.cssText = [
-                sizeName.toLowerCase() + ': ' + (itemSize * this.items.length) + 'px;',
-                cssTransform + ': ' + Style.getTransVal(-itemSize * this.index, this.direction) + ';',
-                cssTransition + ': ' + cssTransform + ' 0ms ' + this.easing + ';',
-                '-webkit-backface-visibility: hidden;',
-                'backface-visibility: hidden;',
-                '-webkit-perspective: 1000;',
-                'perspective: 1000;'
-            ].join('');
+            styleObj = {
+                webkitBackfaceVisibility: 'hidden',
+                backfaceVisibility: 'hidden',
+                webkitPerspective: '1000',
+                perspective: '1000'
+            };
+            styleObj[sizeName.toLowerCase()] = (itemSize * this.items.length) + 'px';
+            styleObj[transform] = Style.getTransVal(-itemSize * this.index, this.direction);
+            styleObj[transition] = cssTransform + ' 0ms ' + this.easing;
+
+            Style.set(this.list, styleObj);
 
             this.items.forEach(function(item) {
                 item.style[sizeName.toLowerCase()] = itemSize + 'px';

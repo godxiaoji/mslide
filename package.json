@@ -1,0 +1,24 @@
+{
+  "name": "@godxiaoji/mslide",
+  "version": "0.0.6",
+  "description": "内容滑动插件",
+  "main": "./dist/mslide.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/godxiaoji/mslide.git"
+  },
+  "keywords": [
+    "swiper",
+    "slide"
+  ],
+  "author": "Travis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/godxiaoji/mslide/issues"
+  },
+  "homepage": "https://github.com/godxiaoji/mslide#readme"
+}

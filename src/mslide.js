@@ -2,7 +2,7 @@
  * MSlide.js
  * @Author  Travis
  * @Contact https://github.com/godxiaoji/mslide
- * @Version 0.0.6
+ * @Version 0.0.7
  */
 "use strict";
 
@@ -75,10 +75,11 @@
 
   // 获取完整样式
   var cssTransform = Style.addPrefix('transform'),
-    // cssTransition = Style.addPrefix('transition'),
+    cssBoxSizing = Style.addPrefix('box-sizing'),
     transform = Style.addPrefix('transform', true),
     transition = Style.addPrefix('transition', true),
     transitionDuration = Style.addPrefix('transitionDuration', true);
+
 
   function Slide (options) {
     // 设置配置
@@ -130,7 +131,7 @@
     this.$wrapper._Slide = this;
 
     // 更新实时设定
-    this.update(this.options);
+    this.updateOptions(this.options);
   };
 
   Slide.prototype = {
@@ -156,7 +157,7 @@
       return (this.index + length + step % length) % length;
     },
     // 更新实时设定
-    update: function (options) {
+    updateOptions: function (options) {
       var self = this;
 
       if (typeof options !== 'object') {
@@ -211,9 +212,9 @@
 
       if (this.slideType === 'fade') {
         this.setFadeStyle();
-        return;
+      } else {
+        this.setSlideStyle();
       }
-      this.setSlideStyle();
     },
     // 设置渐变属性
     setFadeStyle: function () {
@@ -231,7 +232,8 @@
           top: 0,
           width: width + 'px',
           height: height + 'px',
-          opacity: (i === 0 ? 1 : 0)
+          opacity: (i === 0 ? 1 : 0),
+          float: 'none'
         };
         styleObj[transform] = Style.getTransVal(0, this.direction);
         styleObj[transition] = 'opacity 0ms ' + self.easing;
@@ -240,6 +242,7 @@
     },
     // 设置滑动属性
     setSlideStyle: function () {
+      var self = this;
       // 设置滑动样式属性
       var sizeName = this.directionGroup[2],
         itemSize = this.$wrapper['offset' + sizeName],
@@ -262,6 +265,14 @@
 
       this.$items.forEach(function (item) {
         item.style[sizeName.toLowerCase()] = itemSize + 'px';
+
+        if (self.direction = 'x') {
+          // 左右滑动
+          item.style.float = 'left';
+        } else {
+          item.style.float = 'none';
+        }
+        item.style[cssBoxSizing] = 'border-box';
       });
     },
     onMouseOver: function (e) {
@@ -319,6 +330,9 @@
     // 滑动开始事件-记录坐标
     onTouchStart: function (e) {
       var self = this;
+
+      // 禁止图片拖拽
+      e.preventDefault();
 
       if (this.playing) {
         return;

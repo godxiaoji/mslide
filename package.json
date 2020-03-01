@@ -1,6 +1,6 @@
 {
   "name": "mslide",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "description": "内容滑动插件",
   "main": "./dist/mslide.js",
   "scripts": {

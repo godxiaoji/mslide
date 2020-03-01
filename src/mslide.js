@@ -2,7 +2,7 @@
  * MSlide.js
  * @Author  Travis
  * @Contact https://github.com/godxiaoji/mslide
- * @Version 0.0.7
+ * @Version 1.0.0
  */
 "use strict";
 

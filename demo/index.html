@@ -30,18 +30,22 @@
   <body>
     <div class="wrap">
       <ul class="list">
-        <li><img src="images/img1.jpg" alt="" /></li>
-        <li><img src="images/img2.jpg" alt="" /></li>
-        <li><img src="images/img3.jpg" alt="" /></li>
-        <li><img src="images/img4.jpg" alt="" /></li>
+        <li class="item1"><img src="images/img1.jpg" alt="" /></li>
+        <li class="item2"><img src="images/img2.jpg" alt="" /></li>
+        <li class="item3"><img src="images/img3.jpg" alt="" /></li>
+        <li class="item4"><img src="images/img4.jpg" alt="" /></li>
       </ul>
     </div>
-    <script type="text/javascript" src="../dist/MSlide.js"></script>
+    <script type="text/javascript" src="../src/mslide.js"></script>
     <script type="text/javascript">
       var slide = new MSlide({
         selector: '.wrap',
-        autoPlay: true,
-        listSelector: '.list'
+        // autoPlay: true,
+        listSelector: '.list',
+        loop: true,
+        onBeforeSlide: function(to, from) {
+          console.log(to, from)
+        }
       })
     </script>
   </body>

@@ -26,9 +26,11 @@ eg:
 - `nextSelector`: 点击可跳转到下一项的元素，参数同上，一般配合幻灯片使用
 - `autoPlay`: 是否自动滑动，一般幻灯片使用，默认`false`
 - `interval`: 两次滑动之间的间隔时间，默认`4000`秒
+- `loop`: 是否循环切换，默认`false`
 - `easing`: 动画曲线，有`linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`可选，默认`ease`
 - `duration`: 动画时间，默认`100`ms
 - `slideType`: 动画效果，目前有`fade`渐变，和`slide`滑动，默认`slide`
+- `direction`: 切换方向，目前有`y`竖向切换，和`x`横向切换，默认`x`，`slide`模式下有效
 - `index`: 初始定位指定项，默认`0`
 - `onBeforeSlide`: 滑动前回调函数，调用后传入索引作为第一个参数，`this`指向`slide`自身
 - `onSlide`: 滑动后回调函数，调用后传入索引作为第一个参数，`this`指向`slide`自身

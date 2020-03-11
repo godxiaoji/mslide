@@ -2,12 +2,10 @@
  * MSlide.js
  * @Author  Travis
  * @Contact https://github.com/godxiaoji/mslide
- * @Version 1.0.1
+ * @Version 1.0.2
  */
-'use strict'
-
 // Module definition pattern used is returnExports from https://github.com/umdjs/umd
-;(function(root, factory) {
+(function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory)
@@ -20,7 +18,9 @@
     // Browser globals (root is window)
     root.MSlide = factory()
   }
-})(typeof self !== 'undefined' ? self : this, function() {
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict'
+
   var navigator = window.navigator,
     userAgent = navigator.userAgent.toLowerCase()
 
@@ -33,24 +33,26 @@
     mouseover = 'mouseover',
     mouseout = 'mouseout'
 
-  function noop() {}
+  function noop () { }
 
   var passiveSupported = false
   try {
     var options = Object.defineProperty({}, 'passive', {
-      get: function() {
-        passiveSupported = true
+      get: function () {
+        return passiveSupported = true
       }
     })
     window.addEventListener('test', null, options)
-  } catch (err) {}
+  } catch (err) {
+    // 此处不需要任何操作
+  }
 
   var eventOptions = passiveSupported ? { passive: false } : false
 
   // 样式修正
   var Style = {
     // 样式前缀
-    prefix: (function() {
+    prefix: (function () {
       var vendors = 't,webkitT,MozT,msT,OT'.split(','),
         style = document.createElement('div').style,
         t,
@@ -66,7 +68,7 @@
       return ''
     })(),
     // 加入样式前缀，css和js驼峰式
-    addPrefix: function(style, camel) {
+    addPrefix: function (style, camel) {
       if (this.prefix === '') {
         return style
       }
@@ -75,7 +77,7 @@
         : '-' + this.prefix.toLowerCase() + '-' + style
     },
     // 获取滑动距离值
-    getTransVal: function(size, direction) {
+    getTransVal: function (size, direction) {
       return (
         'translate3d(' +
         (direction === 'x'
@@ -85,14 +87,14 @@
       )
     },
     // 设置样式
-    set: function(elem, obj) {
+    set: function (elem, obj) {
       for (var i in obj) {
         elem.style[i] = obj[i]
       }
     }
   }
 
-  function removeElement($el) {
+  function removeElement ($el) {
     $el.parentNode.removeChild($el)
   }
 
@@ -100,7 +102,7 @@
    * 修正因循环导致得排序
    * @param {Element} $list
    */
-  function itemResort($list) {
+  function itemResort ($list) {
     // 采用冒泡排序
     var len = $list.children.length
 
@@ -118,7 +120,7 @@
     }
   }
 
-  function isFunction(obj) {
+  function isFunction (obj) {
     return typeof obj === 'function'
   }
 
@@ -129,7 +131,7 @@
     transition = Style.addPrefix('transition', true),
     transitionDuration = Style.addPrefix('transitionDuration', true)
 
-  function Slide(options) {
+  function Slide (options) {
     // 设置配置
     this.options = options || {}
 
@@ -204,17 +206,19 @@
     slideType: 'slide',
     // 循环切换
     loop: false,
+    // 垂直
+    direction: 'y',
     // 获取items最后索引
-    getLastIndex: function() {
+    getLastIndex: function () {
       return this.$items.length - 1
     },
     // 获取循环的索引
-    getCircleIndex: function(step) {
+    getCircleIndex: function (step) {
       var length = this.$items.length
       return (this.index + length + (step % length)) % length
     },
     // 更新实时设定
-    updateOptions: function(options) {
+    updateOptions: function (options) {
       var self = this
 
       if (typeof options !== 'object') {
@@ -236,7 +240,7 @@
           var $items = [].slice.call(this.$list.children, 0),
             readIndex = $items[this.index]._realIndex
 
-          $items.forEach(function($item) {
+          $items.forEach(function ($item) {
             if ($item._isClone) {
               removeElement($item)
             }
@@ -251,7 +255,7 @@
       // 设置动画效果
       var easeMap = ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']
       this.easing = easeMap[1]
-      easeMap.forEach(function(val) {
+      easeMap.forEach(function (val) {
         if (val === options.easing) {
           self.easing = val
         }
@@ -259,7 +263,7 @@
 
       // 回调事件
       var cbMap = ['onBeforeSlide', 'onSlide', 'onChange']
-      cbMap.forEach(function(val) {
+      cbMap.forEach(function (val) {
         if (isFunction(options[val])) {
           self[val] = options[val]
         }
@@ -267,7 +271,7 @@
 
       // 自定义设置
       var cusMap = ['autoPlay', 'interval', 'duration', 'slideType']
-      cusMap.forEach(function(val) {
+      cusMap.forEach(function (val) {
         if (options[val] != null) {
           self[val] = options[val]
         }
@@ -293,7 +297,7 @@
       }
     },
     // 设置列表项
-    setItems: function() {
+    setItems: function () {
       this.$items = [].slice.call(this.$list.children, 0)
 
       if (this.slideType === 'fade') {
@@ -303,7 +307,7 @@
       }
     },
     // 设置渐变属性
-    setFadeStyle: function() {
+    setFadeStyle: function () {
       var self = this,
         width = this.$list.offsetWidth,
         height = this.$list.offsetHeight
@@ -311,7 +315,7 @@
       this.$list.style.width = width + 'px'
       this.$list.style.height = height + 'px'
 
-      this.$items.forEach(function(item, i) {
+      this.$items.forEach(function (item, i) {
         var styleObj = {
           position: 'absolute',
           left: 0,
@@ -328,7 +332,7 @@
       })
     },
     // 设置滑动属性
-    setSlideStyle: function() {
+    setSlideStyle: function () {
       var self = this
       // 设置滑动样式属性
       var sizeName = this.directionGroup[2],
@@ -356,11 +360,11 @@
 
       Style.set(this.$list, styleObj)
 
-      this.$items.forEach(function(item, i) {
+      this.$items.forEach(function (item, i) {
         item.style[sizeName.toLowerCase()] = itemSize + 'px'
         item._realIndex = i
 
-        if ((self.direction = 'x')) {
+        if (self.direction === 'x') {
           // 左右滑动
           item.style.float = 'left'
         } else {
@@ -369,7 +373,7 @@
         item.style[cssBoxSizing] = 'border-box'
       })
     },
-    updateSlideLoop() {
+    updateSlideLoop () {
       var $firstItem = this.$items[0],
         $lastItem = this.$items[this.$items.length - 1],
         $list = this.$list
@@ -411,16 +415,17 @@
         }
       }
 
+      var $clone
       if (!hasChone) {
         if (slideIndex === this.$items.length - 1) {
           // 最后一个
-          var $clone = $firstItem.cloneNode(true)
+          $clone = $firstItem.cloneNode(true)
           $clone._realIndex = $firstItem._realIndex
           $clone._isClone = true
           // 复制第一个放在后面
           $list.appendChild($clone)
         } else {
-          var $clone = $lastItem.cloneNode(true)
+          $clone = $lastItem.cloneNode(true)
           $clone._realIndex = $lastItem._realIndex
           $clone._isClone = true
           // 复制最后一个放在第一个前面
@@ -440,26 +445,26 @@
         this.index = slideIndex
       }
     },
-    onMouseOver: function(e) {
+    onMouseOver: function () {
       this.stop()
     },
-    onMouseOut: function(e) {
+    onMouseOut: function (e) {
       if (this.autoPlay) {
         this.start()
       }
       this.onTouchEnd(e)
     },
-    onResize: function(e) {
+    onResize: function () {
       var self = this
 
       clearTimeout(this.resizeTimer)
-      this.resizeTimer = setTimeout(function() {
+      this.resizeTimer = setTimeout(function () {
         self.refresh()
       }, 100)
     },
     /* 事件 */
     // 事件处理
-    handleEvent: function(e) {
+    handleEvent: function (e) {
       switch (e.type) {
         case touchstart:
           this.onTouchStart(e)
@@ -495,7 +500,7 @@
     // 变化事件
     onChange: noop,
     // 滑动开始事件-记录坐标
-    onTouchStart: function(e) {
+    onTouchStart: function (e) {
       var self = this
 
       // 禁止图片拖拽
@@ -510,7 +515,7 @@
       if (isAndroid) {
         // 安卓兼容touchend监控失效
         // 3秒后认为滑动结束
-        this.touchMoveTimeout = setTimeout(function() {
+        this.touchMoveTimeout = setTimeout(function () {
           self.resetStatus()
         }, 3000)
       }
@@ -526,7 +531,7 @@
       this.touchCoords.timeStamp = e.timeStamp
     },
     // 滑动过程事件-判断横竖向，跟随滑动
-    onTouchMove: function(e) {
+    onTouchMove: function (e) {
       if (!this.inMove) {
         return
       }
@@ -594,7 +599,7 @@
       }
     },
     // 滑动结束事件-滑到指定位置，重置状态
-    onTouchEnd: function(e) {
+    onTouchEnd: function (e) {
       clearTimeout(this.touchMoveTimeout)
 
       if (!this.inMove) {
@@ -636,7 +641,7 @@
       this.resetStatus()
     },
     // 上一项点击事件
-    onPrevClick: function() {
+    onPrevClick: function () {
       this.clear()
       this.prev()
       if (this.autoPlay) {
@@ -644,7 +649,7 @@
       }
     },
     // 下一项点击事件
-    onNextClick: function() {
+    onNextClick: function () {
       this.clear()
       this.next()
       if (this.autoPlay) {
@@ -653,15 +658,15 @@
     },
     /* 滑动/动画 */
     // 跳转到上一项
-    prev: function() {
+    prev: function () {
       this.to(this.index - 1)
     },
     // 跳转到下一项
-    next: function() {
+    next: function () {
       this.to(this.index + 1)
     },
     // 开始幻灯片
-    start: function() {
+    start: function () {
       if (!this.running) {
         this.running = true
         this.clear()
@@ -669,32 +674,32 @@
       }
     },
     // 结束幻灯片
-    stop: function() {
+    stop: function () {
       this.running = false
       this.clear()
     },
     // 清除滑动状态
-    clear: function() {
+    clear: function () {
       clearTimeout(this.slideTimer)
       this.slideTimer = null
     },
     // 启动自动滑动
-    run: function() {
+    run: function () {
       var self = this
       if (!this.slideTimer) {
-        this.slideTimer = setInterval(function() {
+        this.slideTimer = setInterval(function () {
           self.to(self.getCircleIndex(1))
         }, this.interval)
       }
     },
     // 恢复滑动状态
-    resetStatus: function() {
+    resetStatus: function () {
       if (this.autoPlay) {
         this.run()
       }
     },
     // 到指定项
-    to: function(toIndex) {
+    to: function (toIndex) {
       var active = this.index
       if (toIndex >= 0 && toIndex <= this.getLastIndex() && toIndex != active) {
         this.slide(toIndex)
@@ -703,7 +708,7 @@
       }
     },
     // 滑动实现
-    slide: function(toIndex) {
+    slide: function (toIndex) {
       if (this.playing) {
         return
       }
@@ -735,7 +740,7 @@
         )
       }
 
-      setTimeout(function() {
+      setTimeout(function () {
         self.playing = false
         if (self.slideType === 'fade') {
           self.$items[fadeIndex].style[transitionDuration] = '0ms'
@@ -751,7 +756,7 @@
       }, this.duration)
     },
     // 刷新
-    refresh: function() {
+    refresh: function () {
       this.setItems()
       var last = this.getLastIndex()
       if (this.index > last) {
@@ -761,7 +766,7 @@
       }
     },
     // 销毁
-    destroy: function() {
+    destroy: function () {
       this.destroyed = true
       this.stop()
 

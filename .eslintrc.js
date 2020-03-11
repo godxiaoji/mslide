@@ -1,19 +1,16 @@
 module.exports = {
   "env": {
     "browser": true,
-    "es6": true,
     "node": true
   },
   "extends": "eslint:recommended",
   "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
+    "define": "readonly"
   },
   "parserOptions": {
-    "ecmaVersion": 2018,
+    "ecmaVersion": 2015,
     "sourceType": "module"
   },
-  "parser": "vue-eslint-parser",
   "rules": {
     'no-console': 'off',
   }

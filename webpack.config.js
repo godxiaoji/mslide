@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   entry: './src/mslide.js',
@@ -7,7 +7,9 @@ module.exports = {
     filename: 'mslide.js',
     library: 'MSlide',
     libraryTarget: 'umd',
-    umdNamedDefine: true
+    libraryExport: 'default',
+    umdNamedDefine: true,
+    globalObject: 'this'
   },
   mode: 'production'
-};
+}

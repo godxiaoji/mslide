@@ -1,6 +1,6 @@
 {
   "name": "mslide",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "内容滑动插件",
   "main": "./dist/mslide.js",
   "scripts": {
@@ -21,6 +21,10 @@
     "url": "https://github.com/godxiaoji/mslide/issues"
   },
   "homepage": "https://github.com/godxiaoji/mslide#readme",
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "devDependencies": {
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11"

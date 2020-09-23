@@ -1,17 +1,22 @@
 module.exports = {
-  "env": {
-    "browser": true,
-    "node": true
+  root: true,
+  env: {
+    browser: true,
+    node: true
   },
-  "extends": "eslint:recommended",
-  "globals": {
-    "define": "readonly"
+  extends: 'eslint:recommended',
+  globals: {
+    define: 'readonly'
   },
-  "parserOptions": {
-    "ecmaVersion": 2015,
-    "sourceType": "module"
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: 'module'
   },
-  "rules": {
-    'no-console': 'off',
+  rules: {
+    strict: 0,
+    'newline-per-chained-call': 0,
+    semi: ['error', 'never'],
+    'comma-dangle': ['error', 'never'],
+    'array-bracket-spacing': ['error', 'never']
   }
 }

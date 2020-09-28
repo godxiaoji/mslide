@@ -1,16 +1,17 @@
 {
   "name": "mslide",
-  "version": "1.0.3",
+  "version": "0.0.0-development",
   "description": "轻量级内容切换插件。",
   "main": "./dist/mslide.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint  --fix ./src/**/*.js",
-    "build": "webpack"
+    "build": "webpack",
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/godxiaoji/mslide.git"
+    "url": "https://github.com/godxiaoji/mslide.git"
   },
   "keywords": [
     "swiper",
@@ -35,7 +36,8 @@
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.10.0",
     "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "semantic-release": "^17.1.2"
   },
   "config": {
     "commitizen": {

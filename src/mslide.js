@@ -1,5 +1,3 @@
-'use strict'
-
 var navigator = window.navigator,
   userAgent = navigator.userAgent.toLowerCase()
 
@@ -17,7 +15,7 @@ function noop() {}
 var passiveSupported = false
 try {
   var options = Object.defineProperty({}, 'passive', {
-    get: function () {
+    get: function() {
       return (passiveSupported = true)
     }
   })
@@ -31,7 +29,7 @@ var eventOptions = passiveSupported ? { passive: false } : false
 // 样式修正
 var Style = {
   // 样式前缀
-  prefix: (function () {
+  prefix: (function() {
     var vendors = 't,webkitT,MozT,msT,OT'.split(','),
       style = document.createElement('div').style,
       t,
@@ -47,7 +45,7 @@ var Style = {
     return ''
   })(),
   // 加入样式前缀，css和js驼峰式
-  addPrefix: function (style, camel) {
+  addPrefix: function(style, camel) {
     if (this.prefix === '') {
       return style
     }
@@ -56,7 +54,7 @@ var Style = {
       : '-' + this.prefix.toLowerCase() + '-' + style
   },
   // 获取滑动距离值
-  getTransVal: function (size, direction) {
+  getTransVal: function(size, direction) {
     return (
       'translate3d(' +
       (direction === 'x' ? size + 'px, 0px, 0px' : '0px, ' + size + 'px, 0px') +
@@ -64,7 +62,7 @@ var Style = {
     )
   },
   // 设置样式
-  set: function (elem, obj) {
+  set: function(elem, obj) {
     for (var i in obj) {
       elem.style[i] = obj[i]
     }
@@ -186,16 +184,16 @@ Slide.prototype = {
   // 垂直
   direction: 'y',
   // 获取items最后索引
-  getLastIndex: function () {
+  getLastIndex: function() {
     return this.$items.length - 1
   },
   // 获取循环的索引
-  getCircleIndex: function (step) {
+  getCircleIndex: function(step) {
     var length = this.$items.length
     return (this.index + length + (step % length)) % length
   },
   // 更新实时设定
-  updateOptions: function (options) {
+  updateOptions: function(options) {
     var self = this
 
     if (typeof options !== 'object') {
@@ -217,7 +215,7 @@ Slide.prototype = {
         var $items = [].slice.call(this.$list.children, 0),
           readIndex = $items[this.index]._realIndex
 
-        $items.forEach(function ($item) {
+        $items.forEach(function($item) {
           if ($item._isClone) {
             removeElement($item)
           }
@@ -232,7 +230,7 @@ Slide.prototype = {
     // 设置动画效果
     var easeMap = ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']
     this.easing = easeMap[1]
-    easeMap.forEach(function (val) {
+    easeMap.forEach(function(val) {
       if (val === options.easing) {
         self.easing = val
       }
@@ -240,7 +238,7 @@ Slide.prototype = {
 
     // 回调事件
     var cbMap = ['onBeforeSlide', 'onSlide', 'onChange']
-    cbMap.forEach(function (val) {
+    cbMap.forEach(function(val) {
       if (isFunction(options[val])) {
         self[val] = options[val]
       }
@@ -248,7 +246,7 @@ Slide.prototype = {
 
     // 自定义设置
     var cusMap = ['autoPlay', 'interval', 'duration', 'slideType']
-    cusMap.forEach(function (val) {
+    cusMap.forEach(function(val) {
       if (options[val] != null) {
         self[val] = options[val]
       }
@@ -274,7 +272,7 @@ Slide.prototype = {
     }
   },
   // 设置列表项
-  setItems: function () {
+  setItems: function() {
     this.$items = [].slice.call(this.$list.children, 0)
 
     if (this.slideType === 'fade') {
@@ -284,7 +282,7 @@ Slide.prototype = {
     }
   },
   // 设置渐变属性
-  setFadeStyle: function () {
+  setFadeStyle: function() {
     var self = this,
       width = this.$list.offsetWidth,
       height = this.$list.offsetHeight
@@ -292,7 +290,7 @@ Slide.prototype = {
     this.$list.style.width = width + 'px'
     this.$list.style.height = height + 'px'
 
-    this.$items.forEach(function (item, i) {
+    this.$items.forEach(function(item, i) {
       var styleObj = {
         position: 'absolute',
         left: 0,
@@ -309,7 +307,7 @@ Slide.prototype = {
     })
   },
   // 设置滑动属性
-  setSlideStyle: function () {
+  setSlideStyle: function() {
     var self = this
     // 设置滑动样式属性
     var sizeName = this.directionGroup[2],
@@ -337,7 +335,7 @@ Slide.prototype = {
 
     Style.set(this.$list, styleObj)
 
-    this.$items.forEach(function (item, i) {
+    this.$items.forEach(function(item, i) {
       item.style[sizeName.toLowerCase()] = itemSize + 'px'
       item._realIndex = i
 
@@ -422,26 +420,26 @@ Slide.prototype = {
       this.index = slideIndex
     }
   },
-  onMouseOver: function () {
+  onMouseOver: function() {
     this.stop()
   },
-  onMouseOut: function (e) {
+  onMouseOut: function(e) {
     if (this.autoPlay) {
       this.start()
     }
     this.onTouchEnd(e)
   },
-  onResize: function () {
+  onResize: function() {
     var self = this
 
     clearTimeout(this.resizeTimer)
-    this.resizeTimer = setTimeout(function () {
+    this.resizeTimer = setTimeout(function() {
       self.refresh()
     }, 100)
   },
   /* 事件 */
   // 事件处理
-  handleEvent: function (e) {
+  handleEvent: function(e) {
     switch (e.type) {
       case touchstart:
         this.onTouchStart(e)
@@ -477,7 +475,7 @@ Slide.prototype = {
   // 变化事件
   onChange: noop,
   // 滑动开始事件-记录坐标
-  onTouchStart: function (e) {
+  onTouchStart: function(e) {
     var self = this
 
     // 禁止图片拖拽
@@ -492,7 +490,7 @@ Slide.prototype = {
     if (isAndroid) {
       // 安卓兼容touchend监控失效
       // 3秒后认为滑动结束
-      this.touchMoveTimeout = setTimeout(function () {
+      this.touchMoveTimeout = setTimeout(function() {
         self.resetStatus()
       }, 3000)
     }
@@ -508,7 +506,7 @@ Slide.prototype = {
     this.touchCoords.timeStamp = e.timeStamp
   },
   // 滑动过程事件-判断横竖向，跟随滑动
-  onTouchMove: function (e) {
+  onTouchMove: function(e) {
     if (!this.inMove) {
       return
     }
@@ -576,7 +574,7 @@ Slide.prototype = {
     }
   },
   // 滑动结束事件-滑到指定位置，重置状态
-  onTouchEnd: function (e) {
+  onTouchEnd: function(e) {
     clearTimeout(this.touchMoveTimeout)
 
     if (!this.inMove) {
@@ -618,7 +616,7 @@ Slide.prototype = {
     this.resetStatus()
   },
   // 上一项点击事件
-  onPrevClick: function () {
+  onPrevClick: function() {
     this.clear()
     this.prev()
     if (this.autoPlay) {
@@ -626,7 +624,7 @@ Slide.prototype = {
     }
   },
   // 下一项点击事件
-  onNextClick: function () {
+  onNextClick: function() {
     this.clear()
     this.next()
     if (this.autoPlay) {
@@ -635,15 +633,15 @@ Slide.prototype = {
   },
   /* 滑动/动画 */
   // 跳转到上一项
-  prev: function () {
+  prev: function() {
     this.to(this.index - 1)
   },
   // 跳转到下一项
-  next: function () {
+  next: function() {
     this.to(this.index + 1)
   },
   // 开始幻灯片
-  start: function () {
+  start: function() {
     if (!this.running) {
       this.running = true
       this.clear()
@@ -651,32 +649,32 @@ Slide.prototype = {
     }
   },
   // 结束幻灯片
-  stop: function () {
+  stop: function() {
     this.running = false
     this.clear()
   },
   // 清除滑动状态
-  clear: function () {
+  clear: function() {
     clearTimeout(this.slideTimer)
     this.slideTimer = null
   },
   // 启动自动滑动
-  run: function () {
+  run: function() {
     var self = this
     if (!this.slideTimer) {
-      this.slideTimer = setInterval(function () {
+      this.slideTimer = setInterval(function() {
         self.to(self.getCircleIndex(1))
       }, this.interval)
     }
   },
   // 恢复滑动状态
-  resetStatus: function () {
+  resetStatus: function() {
     if (this.autoPlay) {
       this.run()
     }
   },
   // 到指定项
-  to: function (toIndex) {
+  to: function(toIndex) {
     var active = this.index
     if (toIndex >= 0 && toIndex <= this.getLastIndex() && toIndex != active) {
       this.slide(toIndex)
@@ -685,7 +683,7 @@ Slide.prototype = {
     }
   },
   // 滑动实现
-  slide: function (toIndex) {
+  slide: function(toIndex) {
     if (this.playing) {
       return
     }
@@ -717,7 +715,7 @@ Slide.prototype = {
       )
     }
 
-    setTimeout(function () {
+    setTimeout(function() {
       self.playing = false
       if (self.slideType === 'fade') {
         self.$items[fadeIndex].style[transitionDuration] = '0ms'
@@ -733,7 +731,7 @@ Slide.prototype = {
     }, this.duration)
   },
   // 刷新
-  refresh: function () {
+  refresh: function() {
     this.setItems()
     var last = this.getLastIndex()
     if (this.index > last) {
@@ -743,7 +741,7 @@ Slide.prototype = {
     }
   },
   // 销毁
-  destroy: function () {
+  destroy: function() {
     this.destroyed = true
     this.stop()
 

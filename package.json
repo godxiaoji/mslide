@@ -1,6 +1,6 @@
 {
   "name": "mslide",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "轻量级内容切换插件。",
   "main": "./dist/mslide.js",
   "scripts": {

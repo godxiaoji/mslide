@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/godxiaoji/mslide/compare/v1.1.1...v1.1.2) (2020-10-27)
+
+
+### Bug Fixes
+
+* 修复没有数据时报错的bug ([32a4f50](https://github.com/godxiaoji/mslide/commit/32a4f50157094dba235f208416f2db830e8200e2))
+
 ## [1.1.1](https://github.com/godxiaoji/mslide/compare/v1.1.0...v1.1.1) (2020-09-28)
 
 

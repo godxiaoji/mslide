@@ -26,6 +26,15 @@ try {
 
 var eventOptions = passiveSupported ? { passive: false } : false
 
+function getContentSize($el, size) {
+  var styles = getComputedStyle($el)
+
+  var cW = $el.offsetWidth - parseFloat(styles['padding-left']) - parseFloat(styles['padding-right']) - parseFloat(styles['border-left']) - parseFloat(styles['border-right'])
+  var cH = $el.offsetHeight - parseFloat(styles['padding-top']) - parseFloat(styles['padding-bottom']) - parseFloat(styles['border-top']) - parseFloat(styles['border-bottom'])
+
+  return size === 'Width' ? cW : cH
+}
+
 // 样式修正
 var Style = {
   // 样式前缀
@@ -97,6 +106,10 @@ function itemResort($list) {
 
 function isFunction(obj) {
   return typeof obj === 'function'
+}
+
+function isNumber(obj) {
+  return typeof obj === 'number'
 }
 
 // 获取完整样式
@@ -261,7 +274,7 @@ Slide.prototype = {
 
     // 滑动到指定位置
     this.to(
-      isFunction(options.index) && options.index >= 0
+      isNumber(options.index) && options.index >= 0
         ? options.index
         : this.index
     )
@@ -311,7 +324,7 @@ Slide.prototype = {
     var self = this
     // 设置滑动样式属性
     var sizeName = this.directionGroup[2],
-      itemSize = this.$wrapper['offset' + sizeName],
+      itemSize = getContentSize(this.$wrapper, sizeName),
       styleObj
 
     this.itemSize = itemSize
@@ -675,6 +688,10 @@ Slide.prototype = {
   },
   // 到指定项
   to: function(toIndex) {
+    if (this.$items.length === 0) {
+      return
+    }
+
     var active = this.index
     if (toIndex >= 0 && toIndex <= this.getLastIndex() && toIndex != active) {
       this.slide(toIndex)

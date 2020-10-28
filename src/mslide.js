@@ -500,7 +500,7 @@ Slide.prototype = {
 
     // 禁止图片拖拽
     if (e.target.tagName === 'IMG') {
-      e.target.ondragstart = no
+      e.target.ondragstart = function() { return false }
     }
     // e.preventDefault()
 

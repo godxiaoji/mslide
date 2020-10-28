@@ -34,6 +34,7 @@ eg:
 - `index`: 初始定位指定项，默认`0`
 - `onBeforeSlide`: 滑动前回调函数，调用后传入索引作为第一个参数，`this`指向`slide`自身
 - `onSlide`: 滑动后回调函数，调用后传入索引作为第一个参数，`this`指向`slide`自身
+- `onClick`: 点击后回调函数（滑动时不触发），调用后传入点击事件作为第一个参数，`this`指向`slide`自身
 
 ## Method
 

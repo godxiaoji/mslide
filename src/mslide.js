@@ -146,6 +146,7 @@ function Slide(options) {
   this.$wrapper.addEventListener(touchstart, this, eventOptions)
   this.$wrapper.addEventListener(touchmove, this, eventOptions)
   this.$wrapper.addEventListener(touchend, this, eventOptions)
+  this.$wrapper.addEventListener('click', this, eventOptions)
   if (!isMobile) {
     this.$wrapper.addEventListener(mouseover, this, false)
     this.$wrapper.addEventListener(mouseout, this, false)
@@ -250,7 +251,7 @@ Slide.prototype = {
     })
 
     // 回调事件
-    var cbMap = ['onBeforeSlide', 'onSlide', 'onChange']
+    var cbMap = ['onBeforeSlide', 'onSlide', 'onChange', 'onClick']
     cbMap.forEach(function(val) {
       if (isFunction(options[val])) {
         self[val] = options[val]
@@ -477,6 +478,10 @@ Slide.prototype = {
           this.onPrevClick()
         } else if (e.target == this.$nextBtn) {
           this.onNextClick()
+        } else {
+          if (!this.horizontal) {
+            this.onClick(e)
+          }
         }
         break
     }
@@ -487,12 +492,17 @@ Slide.prototype = {
   onSlide: noop,
   // 变化事件
   onChange: noop,
+  // 非滑动点击事件
+  onClick: noop,
   // 滑动开始事件-记录坐标
   onTouchStart: function(e) {
     var self = this
 
     // 禁止图片拖拽
-    e.preventDefault()
+    if (e.target.tagName === 'IMG') {
+      e.target.ondragstart = no
+    }
+    // e.preventDefault()
 
     if (this.playing) {
       return
@@ -707,8 +717,14 @@ Slide.prototype = {
 
     var self = this,
       fromIndex = this.index,
-      fromRealIndex = this.$items[fromIndex]._realIndex,
+      fromRealIndex = null,
       toRealIndex = this.$items[toIndex]._realIndex
+
+    if (this.$items[fromIndex]) {
+      fromRealIndex = this.$items[fromIndex]._realIndex
+    } else {
+      fromIndex = null
+    }
 
     this.playing = true
     this.index = toIndex
@@ -719,10 +735,10 @@ Slide.prototype = {
 
     if (this.slideType === 'fade') {
       // 渐变模式
-      var fadeIndex = toIndex >= fromIndex ? toIndex : fromIndex
+      var fadeIndex = fromIndex === null || toIndex >= fromIndex ? toIndex : fromIndex
 
       this.$items[fadeIndex].style[transitionDuration] = this.duration + 'ms'
-      this.$items[fadeIndex].style.opacity = toIndex >= fromIndex ? 1 : 0
+      this.$items[fadeIndex].style.opacity = fromIndex === null || toIndex >= fromIndex ? 1 : 0
     } else {
       // 滑动模式
       this.$list.style[transitionDuration] = this.duration + 'ms'
@@ -765,6 +781,7 @@ Slide.prototype = {
     this.$wrapper.removeEventListener(touchstart, this, eventOptions)
     this.$wrapper.removeEventListener(touchmove, this, eventOptions)
     this.$wrapper.removeEventListener(touchend, this, eventOptions)
+    this.$wrapper.removeEventListener('click', this, eventOptions)
     if (!isMobile) {
       this.$wrapper.removeEventListener(mouseover, this, false)
       this.$wrapper.removeEventListener(mouseout, this, false)

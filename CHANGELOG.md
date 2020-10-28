@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/godxiaoji/mslide/compare/v1.1.2...v1.2.0) (2020-10-28)
+
+
+### Bug Fixes
+
+* 修复no函数缺失bug ([6780a52](https://github.com/godxiaoji/mslide/commit/6780a52489f1d11c9b2b9a9755e45e65b335a22a))
+
+
+### Features
+
+* 增加点击（非滑动下）的回调 ([398def5](https://github.com/godxiaoji/mslide/commit/398def5395c47af5dfa60a061bcdd4afcd73bb5d))
+
 ## [1.1.2](https://github.com/godxiaoji/mslide/compare/v1.1.1...v1.1.2) (2020-10-27)
 
 

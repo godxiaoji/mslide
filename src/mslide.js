@@ -29,8 +29,22 @@ var eventOptions = passiveSupported ? { passive: false } : false
 function getContentSize($el, size) {
   var styles = getComputedStyle($el)
 
-  var cW = $el.offsetWidth - parseFloat(styles['padding-left']) - parseFloat(styles['padding-right']) - parseFloat(styles['border-left']) - parseFloat(styles['border-right'])
-  var cH = $el.offsetHeight - parseFloat(styles['padding-top']) - parseFloat(styles['padding-bottom']) - parseFloat(styles['border-top']) - parseFloat(styles['border-bottom'])
+  function parseStyleToNum(name) {
+    return styles[name] ? parseFloat(styles[name]) : 0
+  }
+
+  var cW =
+    $el.offsetWidth -
+    parseStyleToNum('padding-left') -
+    parseStyleToNum('padding-right') -
+    parseStyleToNum('border-left') -
+    parseStyleToNum('border-right')
+  var cH =
+    $el.offsetHeight -
+    parseStyleToNum('padding-top') -
+    parseStyleToNum('padding-bottom') -
+    parseStyleToNum('border-top') -
+    parseStyleToNum('border-bottom')
 
   return size === 'Width' ? cW : cH
 }
@@ -64,11 +78,7 @@ var Style = {
   },
   // 获取滑动距离值
   getTransVal: function(size, direction) {
-    return (
-      'translate3d(' +
-      (direction === 'x' ? size + 'px, 0px, 0px' : '0px, ' + size + 'px, 0px') +
-      ')'
-    )
+    return 'translate3d(' + (direction === 'x' ? size + 'px, 0px, 0px' : '0px, ' + size + 'px, 0px') + ')'
   },
   // 设置样式
   set: function(elem, obj) {
@@ -90,9 +100,9 @@ function itemResort($list) {
   // 采用冒泡排序
   var len = $list.children.length
 
-  for (let i = 0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     // 每次比较时都已经有i个元素到最后去了，所以j < arr.length - 1 - i
-    for (let j = 0; j < len - 1 - i; j++) {
+    for (var j = 0; j < len - 1 - i; j++) {
       var $curr = $list.children[j],
         $next = $list.children[j + 1]
 
@@ -125,9 +135,7 @@ function Slide(options) {
 
   // 获取包裹元素
   this.$wrapper =
-    typeof this.options.selector === 'string'
-      ? document.querySelector(this.options.selector)
-      : this.options.selector
+    typeof this.options.selector === 'string' ? document.querySelector(this.options.selector) : this.options.selector
 
   if (!this.$wrapper || this.$wrapper.nodeType !== 1) {
     throw new Error('通过"selector"获取不到相应元素')
@@ -267,18 +275,13 @@ Slide.prototype = {
     })
 
     // 跟随，渐变不开启跟随
-    this.follow =
-      options.follow === false || this.slideType === 'fade' ? false : true
+    this.follow = options.follow === false || this.slideType === 'fade' ? false : true
 
     // 重设列表
     this.setItems()
 
     // 滑动到指定位置
-    this.to(
-      isNumber(options.index) && options.index >= 0
-        ? options.index
-        : this.index
-    )
+    this.to(isNumber(options.index) && options.index >= 0 ? options.index : this.index)
 
     this.stop()
     if (this.autoPlay) {
@@ -341,10 +344,7 @@ Slide.prototype = {
     // 如果是循环，多预留一个
     var itemCount = this.loop ? this.$items.length + 1 : this.$items.length
     styleObj[sizeName.toLowerCase()] = itemSize * itemCount + 'px'
-    styleObj[transform] = Style.getTransVal(
-      -itemSize * this.index,
-      this.direction
-    )
+    styleObj[transform] = Style.getTransVal(-itemSize * this.index, this.direction)
     styleObj[transition] = cssTransform + ' 0ms ' + this.easing
 
     Style.set(this.$list, styleObj)
@@ -362,7 +362,7 @@ Slide.prototype = {
       item.style[cssBoxSizing] = 'border-box'
     })
   },
-  updateSlideLoop() {
+  updateSlideLoop: function() {
     var $firstItem = this.$items[0],
       $lastItem = this.$items[this.$items.length - 1],
       $list = this.$list
@@ -427,10 +427,7 @@ Slide.prototype = {
 
     if (slideIndex !== this.index) {
       this.$list.style[transitionDuration] = '0ms'
-      this.$list.style[transform] = Style.getTransVal(
-        -this.itemSize * slideIndex,
-        this.direction
-      )
+      this.$list.style[transform] = Style.getTransVal(-this.itemSize * slideIndex, this.direction)
       this.index = slideIndex
     }
   },
@@ -500,7 +497,9 @@ Slide.prototype = {
 
     // 禁止图片拖拽
     if (e.target.tagName === 'IMG') {
-      e.target.ondragstart = function() { return false }
+      e.target.ondragstart = function() {
+        return false
+      }
     }
     // e.preventDefault()
 
@@ -590,10 +589,7 @@ Slide.prototype = {
       transSize += offsetX
     }
     if (absX < itemSize) {
-      this.$list.style[transform] = Style.getTransVal(
-        -transSize,
-        this.direction
-      )
+      this.$list.style[transform] = Style.getTransVal(-transSize, this.direction)
     }
   },
   // 滑动结束事件-滑到指定位置，重置状态
@@ -742,10 +738,7 @@ Slide.prototype = {
     } else {
       // 滑动模式
       this.$list.style[transitionDuration] = this.duration + 'ms'
-      this.$list.style[transform] = Style.getTransVal(
-        -this.itemSize * toIndex,
-        this.direction
-      )
+      this.$list.style[transform] = Style.getTransVal(-this.itemSize * toIndex, this.direction)
     }
 
     setTimeout(function() {
@@ -792,4 +785,5 @@ Slide.prototype = {
   }
 }
 
+// window.MSlide = Slide
 export default Slide

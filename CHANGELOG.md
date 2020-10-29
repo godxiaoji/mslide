@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/godxiaoji/mslide/compare/v1.2.0...v1.2.1) (2020-10-29)
+
+
+### Bug Fixes
+
+* 兼容到ie10 ([ba557ec](https://github.com/godxiaoji/mslide/commit/ba557ecf5e3e072bf2c588072f924320c281ca5c))
+
 # [1.2.0](https://github.com/godxiaoji/mslide/compare/v1.1.2...v1.2.0) (2020-10-28)
 
 

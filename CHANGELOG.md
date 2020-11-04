@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/godxiaoji/mslide/compare/v1.2.1...v1.2.2) (2020-11-04)
+
+
+### Bug Fixes
+
+* 修复销毁时有些定时器没有清空的bug ([48bc82f](https://github.com/godxiaoji/mslide/commit/48bc82f7cc2164625a644c44c906e97d02f18d16))
+
 ## [1.2.1](https://github.com/godxiaoji/mslide/compare/v1.2.0...v1.2.1) (2020-10-29)
 
 

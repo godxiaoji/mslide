@@ -178,7 +178,7 @@ function Slide(options) {
   }
 
   // 检测屏幕变化
-  window.addEventListener('resize', this, false)
+  window.addEventListener('resize', this.onResize, false)
 
   this.$wrapper._Slide = this
 
@@ -467,9 +467,6 @@ Slide.prototype = {
       case mouseout:
         this.onMouseOut(e)
         break
-      case 'resize':
-        this.onResize(e)
-        break
       case 'click':
         if (e.target == this.$prevBtn) {
           this.onPrevClick()
@@ -601,8 +598,6 @@ Slide.prototype = {
     }
 
     this.inMove = false
-    // this.$wrapper.removeEventListener(touchmove, this, false)
-    // this.$wrapper.removeEventListener(touchend, this, false)
 
     if (this.touchCoords) {
       var itemSize = this.itemSize,
@@ -741,7 +736,8 @@ Slide.prototype = {
       this.$list.style[transform] = Style.getTransVal(-this.itemSize * toIndex, this.direction)
     }
 
-    setTimeout(function() {
+    clearTimeout(this.durationTimer)
+    this.durationTimer = setTimeout(function() {
       self.playing = false
       if (self.slideType === 'fade') {
         self.$items[fadeIndex].style[transitionDuration] = '0ms'
@@ -782,6 +778,12 @@ Slide.prototype = {
     this.$prevBtn && this.$prevBtn.removeEventListener('click', this, false)
     this.$nextBtn && this.$nextBtn.removeEventListener('click', this, false)
     this.$wrapper = this.$list = this.$items = this.$prevBtn = this.$nextBtn = null
+
+    window.removeEventListener('resize', this.onResize, false)
+    clearTimeout(this.resizeTimer)
+
+    clearTimeout(this.touchMoveTimeout)
+    clearTimeout(this.durationTimer)
   }
 }
 

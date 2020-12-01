@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/godxiaoji/mslide/compare/v1.2.2...v1.2.3) (2020-12-01)
+
+
+### Bug Fixes
+
+* 修复窗口变化导致插件丢失的bug ([a6efa18](https://github.com/godxiaoji/mslide/commit/a6efa184ce37c55fabbc926f95605d337ee7f2a5))
+
 ## [1.2.2](https://github.com/godxiaoji/mslide/compare/v1.2.1...v1.2.2) (2020-11-04)
 
 

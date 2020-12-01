@@ -445,7 +445,7 @@ Slide.prototype = {
 
     clearTimeout(this.resizeTimer)
     this.resizeTimer = setTimeout(function() {
-      self.refresh()
+      self.refresh && self.refresh()
     }, 100)
   },
   /* 事件 */
